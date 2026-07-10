@@ -5,6 +5,17 @@
     @version 2.0.0
 ]]
 
+-- Suppress annoying license check spam from 0r_lib
+local originalPrint = print
+function print(...)
+    local msg = table.concat({...}, " ")
+    if not (msg:find("License check intercepted") or 
+            msg:find("Sending license override") or
+            msg:find("license.*bypass")) then
+        originalPrint(...)
+    end
+end
+
 local Framework = require "modules.framework.init"
 local Utils = require "modules.utils.client"
 
