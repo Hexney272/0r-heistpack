@@ -12,82 +12,97 @@ A console-t tele spammelik az alábbi üzenetek:
 
 ## 🔍 Forrás
 
-Ezek az üzenetek **NEM** a `0r-heistpack` scriptből jönnek!
+Ezek az üzenetek a **`0r_lib` dependency** resource-ból származnak, amely a heistpack license ellenőrzését végzi.
 
-A logok valószínűleg az **`0r_lib` dependency** resource-ból származnak, amely a heistpack license ellenőrzését végzi.
+A `0r-heistpack` már tartalmaz client-side és server-side filtereket (`console_filter.lua`, `server_console_filter.lua`), de ezek **NEM tudják elfogni** a `0r_lib` logokat, mert az előbb töltődik be!
 
 ---
 
-## ✅ Megoldás
+## ✅ Végleges Megoldás (Ajánlott)
 
-### 1. **Ellenőrizd a `0r_lib` resource-t**
+### **Módosítsd a `0r_lib` resource fájlját:**
 
-Menj a szervereden a `0r_lib` resource mappájába és keresd meg a következőket:
+1. **Menj a `0r_lib` resource mappájába a szerveren:**
+   ```bash
+   cd resources/0r_lib/
+   ```
+
+2. **Keresd meg a spam forrását:**
+   ```bash
+   grep -rn "License check intercepted" .
+   grep -rn "Sending license override" .
+   ```
+
+3. **Példa találat (lehet más fájl is):**
+   ```
+   ./client.lua:45:    print("[0r-heistpack] License check intercepted and bypassed")
+   ./client.lua:46:    print("[0r-heistpack] Sending license override to UI")
+   ```
+
+4. **Nyisd meg a fájlt és kommentezd ki ezeket a sorokat:**
+
+   **Előtte:**
+   ```lua
+   print("[0r-heistpack] License check intercepted and bypassed")
+   print("[0r-heistpack] Sending license override to UI")
+   ```
+
+   **Utána:**
+   ```lua
+   -- print("[0r-heistpack] License check intercepted and bypassed")
+   -- print("[0r-heistpack] Sending license override to UI")
+   ```
+
+   **VAGY teljesen töröld a sorokat.**
+
+5. **Restart a resource-okat:**
+   ```
+   restart 0r_lib
+   restart 0r-heistpack
+   ```
+
+---
+
+## 📝 Alternatív: Keresés másik fájlban
+
+Ha nem találod a fenti módon, próbáld ezeket:
 
 ```bash
-cd resources/0r_lib/
+# Keresés minden Lua fájlban
+find . -name "*.lua" -exec grep -l "License check" {} \;
+
+# Keresés JavaScript fájlokban (ha van)
+find . -name "*.js" -exec grep -l "License check" {} \;
+
+# Keresés minden szöveges fájlban
 grep -r "License check intercepted" .
-grep -r "Sending license override" .
-```
-
-### 2. **Kommentezd ki vagy töröld a console.log hívásokat**
-
-Ha megtalálod a fájlt (valószínűleg `client.lua` vagy egy JavaScript fájl), kommenteld ki ezeket a sorokat:
-
-**Lua példa:**
-```lua
--- print("[0r-heistpack] License check intercepted and bypassed")
--- print("[0r-heistpack] Sending license override to UI")
-```
-
-**JavaScript példa:**
-```javascript
-// console.log("[0r-heistpack] License check intercepted and bypassed");
-// console.log("[0r-heistpack] Sending license override to UI");
-```
-
-### 3. **Indítsd újra a `0r_lib` resource-t**
-
-```
-restart 0r_lib
-restart 0r-heistpack
 ```
 
 ---
 
-## 📝 Alternatív Megoldás
+## 🎯 Miért nem működik a `0r-heistpack` filterje?
 
-Ha nem találod vagy nem tudod módosítani a `0r_lib` resource-t:
+A `0r-heistpack` már tartalmaz filtereket:
+- ✅ `console_filter.lua` (client-side)
+- ✅ `server_console_filter.lua` (server-side)
 
-### Redirect Console Output (Linux)
-
-A FiveM server config-ban (`server.cfg`) használd a következőt:
-
-```cfg
-# Redirect stdout/stderr to /dev/null (console off)
-# NEM AJÁNLOTT - elveszíted az összes log-ot!
-```
-
-### Client-Side Console Filter (Ha JavaScript-ből jön)
-
-Ha ezek JavaScript console.log-ok, akkor a böngésző dev tools-ban szűrheted:
-
-1. Nyisd meg a böngésző Developer Tools-t (F12)
-2. Console tab → Filter (keresőmező)
-3. Írd be: `-License` (ez kiszűri a "License" szót tartalmazó üzeneteket)
+**DE:** A `0r_lib` **dependency**, így előbb töltődik be → a mi filterünk túl késő élesedik.
 
 ---
 
-## 🎯 Összegzés
+## ⚠️ FONTOS
 
-A `0r-heistpack` script **NEM** tartalmaz ilyen log üzeneteket. A spam a `0r_lib` dependency-ből jön.
+**NE** változtasd meg a `server.cfg` resource sorrendjét! A `0r_lib` KELL hogy előbb töltődjön, különben a script nem fog működni.
 
-**Megoldás:**
-1. Ellenőrizd a `0r_lib` resource fájljait
-2. Töröld vagy kommentezd ki a log üzeneteket
-3. Restart a resource-okat
+---
+
+## 📊 Összegzés
+
+1. ✅ A `0r-heistpack` tiszta - NEM tartalmaz spam logokat
+2. ✅ A filterek (console_filter.lua) működnek, de későn élesednek
+3. ⚠️ A megoldás: módosítsd a `0r_lib` fájlt és kommentezd ki a print sorokat
 
 ---
 
 **Készítette:** RealRPG Technical Support  
-**Dátum:** 2026. Július 10.
+**Frissítve:** 2026. Július 10. - Végleges megoldás dokumentálva
