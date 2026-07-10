@@ -37,8 +37,6 @@ function ServerApplicationClass:initialize()
     self:_registerUseableItems()
 end
 
---[[ License Validation - Removed for Open Source ]]
-
 --[[ Player Management ]]
 
 ---Handle player dropped
@@ -67,7 +65,7 @@ function ServerApplicationClass:start()
     self.load = true
 
     -- Version check
-    lib.versionCheck("alikocidev/docs_0resmon_heistpack")
+    -- lib.versionCheck("alikocidev/docs_0resmon_heistpack")
 
     print("^2[SUCCESS] HeistPack server loaded successfully!^7")
 end
@@ -115,11 +113,6 @@ function ServerApplicationClass:_registerCallbacks()
 
     lib.callback.register(_e("server:removeItem"), function(source, itemName, amount)
         return Inventory.removeItem(source, itemName, amount or 1)
-    end)
-
-    -- Open Source License Bypass - Always return true
-    lib.callback.register("0r-heistpack:server:checkLicense", function(source)
-        return true
     end)
 end
 

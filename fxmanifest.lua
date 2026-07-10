@@ -1,10 +1,10 @@
 fx_version "cerulean"
 lua54 "yes"
 game "gta5"
-name "0r-heistpack"
-author "0resmon"
+name "RealRPG-heistpack"
+author "RealRPG"
 version "1.0.8"
-description "Heist Pack"
+description "RealRPG Heist Pack"
 
 shared_scripts {
 	"@ox_lib/init.lua",

@@ -6,7 +6,7 @@
 Config = {}
 
 -- Default locale for the script.
-Config.locale = "en"
+Config.locale = "hu"
 
 --[[ The images folder path of your inventory script ]]
 -- So that item names and images will match your inventory - images only PNG !

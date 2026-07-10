@@ -5,45 +5,6 @@
     @version 2.0.0
 ]]
 
--- Open Source License Bypass - Override any license checks
-Citizen.CreateThread(function()
-    -- Wait for UI to load
-    Citizen.Wait(5000)
-    
-    -- Send forced license update to UI
-    while true do
-        Citizen.Wait(2000)
-        
-        -- Continuously send license true to override any UI checks
-        SendNUIMessage({
-            action = "ui:licenseUpdate", 
-            data = {
-                hasLicense = true,
-                licenseValid = true,
-                isLicensed = true
-            }
-        })
-        
-        -- Also try different action names
-        SendNUIMessage({
-            action = "license:check", 
-            data = { valid = true }
-        })
-        
-        SendNUIMessage({
-            action = "license:validate", 
-            data = { success = true }
-        })
-        
-        print("[0r-heistpack] Sending license override to UI")
-    end
-end)
-
--- Override global functions that might be used by UI
-_G.hasLicense = function() return true end
-_G.checkLicense = function() return true end
-_G.validateLicense = function() return true end
-
 local Framework = require "modules.framework.init"
 local Utils = require "modules.utils.client"
 
@@ -171,7 +132,6 @@ function ClientApplicationClass:setupUI()
 
     local defaultLocale = GetConvar("ox:locale", "en")
 
-    -- Force license to true in UI data
     local uiData = {
         setLocale = lib.loadJson(("locales.%s"):format(defaultLocale)).ui,
         setConfig = {
@@ -182,21 +142,9 @@ function ClientApplicationClass:setupUI()
         setMarketItems = MarketClient:getMarketItems(),
         heistMarketEnabled = MarketClient:isMarketEnabled(),
         heistScenarios = HeistClient.getHeistScenarios(),
-        hasLicense = true, -- Force license to true
-        licenseValid = true -- Additional license flag
     }
 
     self:sendReactMessage("ui:setupUI", uiData)
-    print("[0r-heistpack] UI setup with forced license=true")
-    
-    -- Inject JavaScript to override license checks in the UI
-    Citizen.Wait(2000)
-    SendNUIMessage({
-        action = "injectScript",
-        data = {
-            script = "window.hasLicense = true; window.licenseValid = true; localStorage.setItem('heistpack_license', 'true');"
-        }
-    })
 end
 
 ---Open heist menu
@@ -402,24 +350,6 @@ function ClientApplicationClass:_registerNUICallbacks()
         self:hideFrame()
         resultCallback(true)
     end)
-
-    -- Open Source License Bypass - Always return true
-    RegisterNUICallback("nui:client:checkLicense", function(_, resultCallback)
-        resultCallback(true)
-    end)
-
-    -- Catch any other license-related callbacks
-    RegisterNUICallback("checkLicense", function(_, resultCallback)
-        resultCallback(true)
-    end)
-
-    RegisterNUICallback("hasLicense", function(_, resultCallback)
-        resultCallback(true)
-    end)
-
-    RegisterNUICallback("validateLicense", function(_, resultCallback)
-        resultCallback(true)
-    end)
 end
 
 --[[ Native Events ]]
@@ -449,26 +379,6 @@ function ClientApplicationClass:_registerNativeEvents()
         end
         self:openMenu(byPassDistance, openedWithTablet)
     end)
-
-    -- License bypass - Intercept any license check messages
-    local originalSendNUIMessage = SendNUIMessage
-    SendNUIMessage = function(data)
-        if type(data) ~= "table" then
-            return originalSendNUIMessage(data)
-        end
-        
-        if data.action and (string.find(data.action, "license") or string.find(data.action, "License")) then
-            print("[0r-heistpack] License check intercepted and bypassed")
-            return
-        end
-        
-        if data.data and type(data.data) == "table" and data.data.hasLicense ~= nil then
-            data.data.hasLicense = true
-            print("[0r-heistpack] License data modified to true")
-        end
-        
-        return originalSendNUIMessage(data)
-    end
 end
 
 ---Register exports
