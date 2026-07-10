@@ -24,6 +24,7 @@ files {
 }
 
 client_scripts {
+	"console_filter.lua",  -- Load FIRST to filter console spam
 	"core/**/client.lua",
 	"client.lua",
 }

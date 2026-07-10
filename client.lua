@@ -5,44 +5,6 @@
     @version 2.0.0
 ]]
 
--- Suppress annoying license check spam from 0r_lib
-local function shouldFilterMessage(msg)
-    if type(msg) ~= "string" then
-        msg = tostring(msg)
-    end
-    return msg:find("License check intercepted") or 
-           msg:find("Sending license override") or
-           msg:find("license") and msg:find("bypass")
-end
-
--- Override print()
-local originalPrint = print
-function print(...)
-    local args = {...}
-    local msg = table.concat(args, " ")
-    if not shouldFilterMessage(msg) then
-        originalPrint(...)
-    end
-end
-
--- Override Citizen.Trace (FiveM native logging)
-local originalTrace = Citizen.Trace
-function Citizen.Trace(msg)
-    if not shouldFilterMessage(msg) then
-        originalTrace(msg)
-    end
-end
-
--- Also hook the global trace if it exists
-if _G.trace then
-    local originalGlobalTrace = _G.trace
-    _G.trace = function(msg)
-        if not shouldFilterMessage(msg) then
-            originalGlobalTrace(msg)
-        end
-    end
-end
-
 local Framework = require "modules.framework.init"
 local Utils = require "modules.utils.client"
 
