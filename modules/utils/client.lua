@@ -98,7 +98,61 @@ end
 ---@param message string
 ---@param coords vector3
 function Utils.triggerPoliceAlert(key, message, coords)
-    -- ? Use your own alert dispatch script export/event
+    -- origen_police dispatch integration
+    if shared.isResourceStart("origen_police") then
+        exports["origen_police"]:SendAlert({
+            coords = coords,
+            title = message,
+            type = "robbery", -- Type of alert (robbery, theft, etc.)
+            blip = {
+                sprite = 161,  -- Blip sprite for robbery
+                color = 1,     -- Blip color (red)
+                scale = 1.0,
+                time = 5       -- Blip duration in minutes
+            },
+            jobs = { "police", "sheriff" }, -- Jobs that receive the alert
+            message = message,
+            duration = 300000 -- Alert duration in milliseconds (5 minutes)
+        })
+    end
+    
+    -- Alternative dispatch systems (uncomment if needed):
+    
+    -- ps-dispatch
+    -- if shared.isResourceStart("ps-dispatch") then
+    --     exports["ps-dispatch"]:CustomAlert({
+    --         coords = coords,
+    --         message = message,
+    --         dispatchCode = "10-90", -- Robbery in progress
+    --         description = key,
+    --         radius = 0,
+    --         sprite = 161,
+    --         color = 1,
+    --         scale = 1.0,
+    --         length = 3,
+    --     })
+    -- end
+    
+    -- cd_dispatch
+    -- if shared.isResourceStart("cd_dispatch") then
+    --     TriggerServerEvent('cd_dispatch:AddNotification', {
+    --         job_table = {'police', 'sheriff'},
+    --         coords = coords,
+    --         title = '10-90 - ' .. message,
+    --         message = key,
+    --         flash = 0,
+    --         unique_id = key .. '_' .. os.time(),
+    --         blip = {
+    --             sprite = 161,
+    --             scale = 1.0,
+    --             colour = 1,
+    --             flashes = false,
+    --             text = message,
+    --             time = (5 * 60 * 1000),
+    --             sound = 1,
+    --         }
+    --     })
+    -- end
 end
 
 function Utils.canPlayerOpenHeistMenu()
