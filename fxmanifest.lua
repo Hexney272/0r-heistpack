@@ -30,6 +30,7 @@ client_scripts {
 }
 
 server_scripts {
+	"server_console_filter.lua",  -- Load FIRST to filter server console spam
 	"@oxmysql/lib/MySQL.lua",
 	"core/**/server.lua",
 	"server.lua",
